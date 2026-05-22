@@ -1,0 +1,8 @@
+# config/packages/framework.yaml
+framework:
+    session:
+        # Utiliser un dossier temporaire système
+        save_path: '%kernel.cache_dir%/sessions'
+        
+        # Ou spécifier un chemin absolu
+        # save_path: 'C:/Windows/Temp/symfony_sessions'

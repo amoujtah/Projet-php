@@ -1,0 +1,85 @@
+﻿{% extends "base.html.twig" %}
+
+{% block title %}Connexion - Le Bistrot Français{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow border-0">
+                <div class="card-header bg-white border-0 pt-4">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-wine-glass-alt fa-3x" style="color: #8B4513;"></i>
+                    </div>
+                    <h1 class="h3 text-center mb-0">Connexion</h1>
+                    <p class="text-center text-muted mb-0">Accédez à votre espace personnel</p>
+                </div>
+                <div class="card-body p-4">
+                    {% if error %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="inputEmail" class="form-label fw-medium">
+                                <i class="fas fa-envelope me-2"></i>Adresse email
+                            </label>
+                            <input type="email" 
+                                   value="{{ last_username }}" 
+                                   name="_username"  {# ← ICI : _username au lieu de email #}
+                                   id="inputEmail" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="votre@email.com" 
+                                   required 
+                                   autofocus>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="inputPassword" class="form-label fw-medium">
+                                <i class="fas fa-lock me-2"></i>Mot de passe
+                            </label>
+                            <input type="password" 
+                                   name="_password"  {# ← ICI : _password au lieu de password #}
+                                   id="inputPassword" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="Votre mot de passe" 
+                                   required>
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        <div class="d-grid mb-3">
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mb-3">
+                            <a href="#" class="text-decoration-none">Mot de passe oublié ?</a>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-3">Pas encore de compte ?</p>
+                        <a href="{{ path('app_register') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Créer un compte
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 text-center py-3">
+                    <small class="text-muted">
+                        En vous connectant, vous acceptez nos 
+                        <a href="#" class="text-decoration-none">conditions d'utilisation</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

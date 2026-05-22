@@ -1,0 +1,264 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Gestion des {{ typeLabel|lower }} - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Administration</h6>
+                
+                <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_tables') }}">
+                    <i class="fas fa-chair"></i> Gestion des tables
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_plats') }}">
+                    <i class="fas fa-utensils"></i> Gestion des plats
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_menus') }}">
+                    <i class="fas fa-clipboard-list"></i> Gestion des menus
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_admin_users') }}">
+                    <i class="fas fa-users"></i> Gestion des utilisateurs
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Réservations
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div>
+                    <h1 class="h2 mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        {{ typeLabel }}
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('app_admin_dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('app_admin_users') }}">Utilisateurs</a></li>
+                            <li class="breadcrumb-item active">{{ typeLabel }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Nouvel utilisateur
+                </a>
+            </div>
+            
+            <!-- Filtres par type -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{{ path('app_admin_users_by_type', {'type': 'admin'}) }}" 
+                               class="btn w-100 {{ type == 'admin' ? 'btn-danger' : 'btn-outline-danger' }}">
+                                <i class="fas fa-user-shield"></i> Administrateurs
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ path('app_admin_users_by_type', {'type': 'serveur'}) }}" 
+                               class="btn w-100 {{ type == 'serveur' ? 'btn-warning' : 'btn-outline-warning' }}">
+                                <i class="fas fa-concierge-bell"></i> Serveurs
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ path('app_admin_users_by_type', {'type': 'client'}) }}" 
+                               class="btn w-100 {{ type == 'client' ? 'btn-success' : 'btn-outline-success' }}">
+                                <i class="fas fa-user"></i> Clients
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ path('app_admin_users') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-users"></i> Tous les utilisateurs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tableau des utilisateurs -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ typeLabel }} ({{ users|length }})</h5>
+                    <span class="badge bg-primary">{{ users|length }} {{ typeLabel|lower }}</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if users|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Utilisateur</th>
+                                    <th>Email</th>
+                                    <th>Téléphone</th>
+                                    <th>Inscription</th>
+                                    <th>Réservations</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>#{{ user.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3 bg-{{ 
+                                                user.type == 'admin' ? 'danger' : 
+                                                (user.type == 'serveur' ? 'warning' : 'success') 
+                                            }}">
+                                                {{ user.nom|first|upper }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ user.nom }}</strong>
+                                                {% if user == app.user %}
+                                                    <span class="badge bg-info ms-2">Vous</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone ? user.phone : '-' }}</td>
+                                    <td>
+                                        <small>{{ user.createdAt|date('d/m/Y') }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ user.reservations|length > 0 ? 'primary' : 'secondary' }}">
+                                            {{ user.reservations|length }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ path('app_admin_user_edit', {'id': user.id}) }}" 
+                                               class="btn btn-outline-warning" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% if user != app.user %}
+                                            <form method="post" 
+                                                  action="{{ path('app_admin_user_delete', {'id': user.id}) }}" 
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');"
+                                                  style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucun {{ typeLabel|lower }} trouvé</h5>
+                        <p class="text-muted mb-0">Il n'y a pas encore de {{ typeLabel|lower }} enregistré.</p>
+                        <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary mt-3">
+                            <i class="fas fa-user-plus me-2"></i>Créer un {{ 
+                                type == 'admin' ? 'administrateur' : 
+                                (type == 'serveur' ? 'serveur' : 'client') 
+                            }}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Statistiques -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card bg-{{ 
+                        type == 'admin' ? 'danger' : 
+                        (type == 'serveur' ? 'warning' : 'success') 
+                    }} text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-white-50 mb-2">Statistiques des {{ typeLabel|lower }}</h6>
+                                    <h3 class="mb-0">{{ users|length }} {{ typeLabel|lower }}</h3>
+                                    <p class="mb-0 mt-2">
+                                        <small>
+                                            <i class="fas fa-calendar"></i>
+                                            {% if users|length > 0 %}
+                                                Dernier inscrit : {{ users|first.createdAt|date('d/m/Y') }}
+                                            {% else %}
+                                                Aucun {{ typeLabel|lower }} enregistré
+                                            {% endif %}
+                                        </small>
+                                    </p>
+                                </div>
+                                <i class="fas fa-{{
+                                    type == 'admin' ? 'user-shield' : 
+                                    (type == 'serveur' ? 'concierge-bell' : 'user')
+                                }} fa-3x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.user-avatar.bg-danger { background-color: #dc3545; }
+.user-avatar.bg-warning { background-color: #ffc107; color: #212529; }
+.user-avatar.bg-success { background-color: #28a745; }
+.user-avatar.bg-info { background-color: #17a2b8; }
+.sidebar {
+    background-color: #343a40;
+    min-height: calc(100vh - 56px);
+    padding-top: 1rem;
+}
+.sidebar .nav-link {
+    color: rgba(255,255,255,.8);
+    padding: 0.5rem 1rem;
+    margin: 0.1rem 0;
+}
+.sidebar .nav-link:hover {
+    background-color: rgba(255,255,255,.1);
+    color: white;
+}
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+.content-area {
+    padding-top: 1rem;
+}
+.badge {
+    font-size: 0.85em;
+    padding: 0.35em 0.65em;
+}
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

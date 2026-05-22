@@ -1,0 +1,137 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Gestion des plats - Le Bistrot Français{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Administration</h6>
+                
+                <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_tables') }}">
+                    <i class="fas fa-chair"></i> Gestion des tables
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_admin_plats') }}">
+                    <i class="fas fa-utensils"></i> Gestion des plats
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_menus') }}">
+                    <i class="fas fa-clipboard-list"></i> Gestion des menus
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_users') }}">
+                    <i class="fas fa-users"></i> Gestion des utilisateurs
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Réservations
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-utensils me-2"></i>
+                    Carte des plats
+                </h1>
+                <a href="{{ path('app_admin_plat_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Nouveau plat
+                </a>
+            </div>
+            
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            <!-- Navigation catégories -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h6 class="mb-3">Filtrer par catégorie</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ path('app_admin_plats') }}" class="badge bg-primary p-2 text-decoration-none">
+                            Tous les plats
+                        </a>
+                        <a href="#" class="badge bg-secondary p-2 text-decoration-none">Entrées</a>
+                        <a href="#" class="badge bg-secondary p-2 text-decoration-none">Plats principaux</a>
+                        <a href="#" class="badge bg-secondary p-2 text-decoration-none">Desserts</a>
+                        <a href="#" class="badge bg-secondary p-2 text-decoration-none">Boissons</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                {% for plat in plats %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <!-- RETIREZ LE BLOC IMAGE -->
+                        <!-- <img src="..." class="card-img-top" alt="..."> -->
+                        
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">{{ plat.nom }}</h5>
+                                    <span class="badge bg-info">{{ plat.categorie }}</span>
+                                    {% if not plat.disponible %}
+                                        <span class="badge bg-danger">Indisponible</span>
+                                    {% endif %}
+                                </div>
+                                <span class="fs-5 fw-bold text-primary">
+                                    {{ plat.prix|number_format(2, ',', ' ') }} €
+                                </span>
+                            </div>
+                            <p class="card-text text-muted mb-3">
+                                {{ plat.description|slice(0, 100) }}{{ plat.description|length > 100 ? '...' : '' }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ plat.createdAt|date('d/m/Y') }}
+                                </small>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ path('app_admin_plat_edit', {'id': plat.id}) }}" 
+                                       class="btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" 
+                                          action="{{ path('app_admin_plat_delete', {'id': plat.id}) }}" 
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce plat ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ plat.id) }}">
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted mb-3">Aucun plat disponible</h5>
+                            <a href="{{ path('app_admin_plat_new') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Ajouter votre premier plat
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

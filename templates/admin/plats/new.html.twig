@@ -1,0 +1,145 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Nouveau plat - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Administration</h6>
+                
+                <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_tables') }}">
+                    <i class="fas fa-chair"></i> Gestion des tables
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_admin_plats') }}">
+                    <i class="fas fa-utensils"></i> Gestion des plats
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_menus') }}">
+                    <i class="fas fa-clipboard-list"></i> Gestion des menus
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_users') }}">
+                    <i class="fas fa-users"></i> Gestion des utilisateurs
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Réservations
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Nouveau plat
+                </h1>
+                <a href="{{ path('app_admin_plats') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+            
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Ajouter un nouveau plat à la carte</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form_label(form.nom, 'Nom du plat') }}
+                                    {{ form_widget(form.nom, {'attr': {'class': 'form-control' ~ (form.nom.vars.errors|length ? ' is-invalid' : '')}}) }}
+                                    {{ form_errors(form.nom) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_label(form.categorie, 'Catégorie') }}
+                                    {{ form_widget(form.categorie, {'attr': {'class': 'form-select' ~ (form.categorie.vars.errors|length ? ' is-invalid' : '')}}) }}
+                                    {{ form_errors(form.categorie) }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.description, 'Description') }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.errors|length ? ' is-invalid' : ''), 'rows': 3}}) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form_label(form.prix, 'Prix (€)') }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.prix, {'attr': {'class': 'form-control' ~ (form.prix.vars.errors|length ? ' is-invalid' : '')}}) }}
+                                        <span class="input-group-text">€</span>
+                                    </div>
+                                    {{ form_errors(form.prix) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_label(form.disponible, 'Disponibilité') }}
+                                    <div class="form-check form-switch mt-2">
+                                        {{ form_widget(form.disponible, {'attr': {'class': 'form-check-input'}}) }}
+                                        <label class="form-check-label" for="{{ form.disponible.vars.id }}">
+                                            Plat disponible
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- SUPPRIMEZ CE CHAMP IMAGE -->
+                            {# <div class="mb-3">
+                                {{ form_label(form.image, 'Image du plat') }}
+                                {{ form_widget(form.image, {'attr': {'class': 'form-control' ~ (form.image.vars.errors|length ? ' is-invalid' : '')}}) }}
+                                <div class="form-text">
+                                    Formats acceptés : JPEG, PNG, WebP (max 1MB)
+                                </div>
+                                {{ form_errors(form.image) }}
+                            </div> #}
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.createdAt, 'Date d\'ajout') }}
+                                {{ form_widget(form.createdAt, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="{{ path('app_admin_plats') }}" class="btn btn-outline-secondary me-2">
+                                    Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Créer le plat
+                                </button>
+                            </div>
+                            
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

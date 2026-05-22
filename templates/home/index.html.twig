@@ -1,0 +1,292 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - Le Bistrot Français{% endblock %}
+
+{% block body %}
+<!-- Hero Section avec image de fond -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-3 fw-bold mb-4">Le Bistrot Français</h1>
+                <p class="lead mb-4">Une expérience gastronomique authentique au cœur de Paris</p>
+                <div class="mt-4">
+                    <a href="{{ path('app_public_carte') }}" class="btn btn-primary btn-lg px-4 py-3 me-3">
+                        <i class="fas fa-utensils me-2"></i>Découvrir la carte
+                    </a>
+                    <a href="{{ path('app_public_reserver') }}" class="btn btn-light btn-lg px-4 py-3">
+                        <i class="fas fa-calendar-check me-2"></i>Réserver une table
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- À propos -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <h2 class="section-title">Notre Histoire</h2>
+                <p class="lead">
+                    Depuis 1995, Le Bistrot Français perpétue la tradition culinaire française 
+                    avec passion et créativité.
+                </p>
+                <p>
+                    Notre chef étoilé, Jean-Pierre Martin, revisite les classiques de la cuisine française
+                    avec des produits frais et locaux, dans le respect des saisons.
+                </p>
+                <p>
+                    Dans un cadre chaleureux et élégant, venez découvrir une cuisine raffinée 
+                    qui met en valeur les saveurs authentiques de nos régions.
+                </p>
+                <a href="#contact" class="btn btn-outline-primary mt-3">
+                    <i class="fas fa-info-circle me-2"></i>En savoir plus
+                </a>
+            </div>
+            <div class="col-md-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+                             alt="Notre restaurant" class="img-fluid rounded shadow">
+                    </div>
+                    <div class="col-6">
+                        <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+                             alt="Notre cuisine" class="img-fluid rounded shadow">
+                    </div>
+                    <div class="col-6 mt-3">
+                        <img src="https://images.unsplash.com/photo-1578474846511-04ba529f0b88?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+                             alt="Notre salle" class="img-fluid rounded shadow">
+                    </div>
+                    <div class="col-6 mt-3">
+                        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+                             alt="Nos plats" class="img-fluid rounded shadow">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Spécialités -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Nos Spécialités</h2>
+            <p class="text-muted">Découvrez l'excellence de notre cuisine</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-fish fa-3x" style="color: var(--primary-color);"></i>
+                        </div>
+                        <h4 class="card-title">Poissons & Fruits de Mer</h4>
+                        <p class="card-text">Catch of the day, huîtres fraîches, bouillabaisse traditionnelle, 
+                           sole meunière préparée à la minute.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-drumstick-bite fa-3x" style="color: var(--primary-color);"></i>
+                        </div>
+                        <h4 class="card-title">Viandes & Gibiers</h4>
+                        <p class="card-text">Bœuf bourguignon mijoté, confit de canard croustillant, 
+                           filet mignon aux morilles, côte de bœuf pour deux.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-cheese fa-3x" style="color: var(--primary-color);"></i>
+                        </div>
+                        <h4 class="card-title">Fromages & Desserts</h4>
+                        <p class="card-text">Assiette de fromages affinés, soufflé au chocolat grand marnier, 
+                           tarte tatin maison, île flottante à l'ancienne.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card bg-dark text-white h-100">
+                    <div class="card-body p-5 text-center">
+                        <h3 class="mb-4"><i class="fas fa-book-open me-2"></i>Notre Carte Complète</h3>
+                        <p class="mb-4">Découvrez notre menu saisonnier élaboré avec des produits frais du marché</p>
+                        <a href="{{ path('app_public_carte') }}" class="btn btn-light btn-lg">
+                            Explorer la carte <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card text-white h-100" style="background-color: var(--primary-color);">
+                    <div class="card-body p-5 text-center">
+                        <h3 class="mb-4"><i class="fas fa-calendar-check me-2"></i>Réservez Votre Table</h3>
+                        <p class="mb-4">Garantissez votre place pour une expérience culinaire inoubliable</p>
+                        <a href="{{ path('app_public_reserver') }}" class="btn btn-light btn-lg">
+                            Réserver maintenant <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Informations & Contact -->
+<section class="py-5 bg-light" id="contact">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Informations Pratiques</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="p-4 bg-white rounded shadow-sm h-100">
+                    <i class="fas fa-clock fa-2x mb-3" style="color: var(--primary-color);"></i>
+                    <h5 class="mb-3">Horaires d'Ouverture</h5>
+                    <div class="text-start">
+                        <p class="mb-2"><strong>Lundi - Vendredi</strong></p>
+                        <p class="mb-3">Déjeuner: 12h00 - 14h30<br>Dîner: 19h00 - 22h30</p>
+                        <p class="mb-2"><strong>Samedi - Dimanche</strong></p>
+                        <p>Déjeuner: 12h00 - 15h00<br>Dîner: 19h00 - 23h00</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 text-center">
+                <div class="p-4 bg-white rounded shadow-sm h-100">
+                    <i class="fas fa-map-marker-alt fa-2x mb-3" style="color: var(--primary-color);"></i>
+                    <h5 class="mb-3">Notre Adresse</h5>
+                    <p class="mb-3">
+                        <strong>Le Bistrot Français</strong><br>
+                        123 Rue Gourmande<br>
+                        75000 Paris
+                    </p>
+                    <a href="https://maps.google.com" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-directions me-1"></i>Itinéraire
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4 text-center">
+                <div class="p-4 bg-white rounded shadow-sm h-100">
+                    <i class="fas fa-phone fa-2x mb-3" style="color: var(--primary-color);"></i>
+                    <h5 class="mb-3">Contact & Réservations</h5>
+                    <p class="mb-3">
+                        <i class="fas fa-phone me-2"></i> 01 23 45 67 89<br>
+                        <i class="fas fa-envelope me-2"></i> contact@lebistrotfrancais.fr
+                    </p>
+                    <p class="text-muted small">
+                        Réservation recommandée, surtout pour les week-ends
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Témoignages -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Ce que disent nos clients</h2>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="user-avatar me-3">M</div>
+                            <div>
+                                <h6 class="mb-0">Marie Dupont</h6>
+                                <small class="text-muted">Dîner d'anniversaire</small>
+                            </div>
+                        </div>
+                        <p class="card-text">
+                            "Une soirée exceptionnelle ! Le service était impeccable et le canard confit 
+                            était absolument divin. Nous reviendrons certainement."
+                        </p>
+                        <div class="text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="user-avatar me-3">P</div>
+                            <div>
+                                <h6 class="mb-0">Pierre Martin</h6>
+                                <small class="text-muted">Déjeuner d'affaires</small>
+                            </div>
+                        </div>
+                        <p class="card-text">
+                            "Ambiance élégante et cuisine raffinée. Parfait pour un déjeuner d'affaires. 
+                            La carte des vins est particulièrement remarquable."
+                        </p>
+                        <div class="text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="user-avatar me-3">S</div>
+                            <div>
+                                <h6 class="mb-0">Sophie Leroy</h6>
+                                <small class="text-muted">Dîner en amoureux</small>
+                            </div>
+                        </div>
+                        <p class="card-text">
+                            "Cadre romantique, service discret et attentif. Le soufflé au chocolat était 
+                            le point culminant d'une soirée parfaite. À recommander vivement !"
+                        </p>
+                        <div class="text-warning">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

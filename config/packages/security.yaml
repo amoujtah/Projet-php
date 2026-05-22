@@ -1,0 +1,50 @@
+# config/packages/security.yaml
+security:
+    # 1. Password Hashers (OBLIGATOIRE)
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        App\Entity\User:
+            algorithm: auto
+    
+    # 2. User Providers (OBLIGATOIRE)
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+    
+    # 3. Firewalls (OBLIGATOIRE - C'EST CE QUI MANQUAIT)
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        
+        main:
+            lazy: true
+            provider: app_user_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+            logout:
+                path: app_logout
+                target: app_home
+    
+    # 4. Votre configuration existante
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_SERVEUR, ROLE_CLIENT]
+        ROLE_SERVEUR: [ROLE_CLIENT]
+    
+    # 5. Access Control
+    access_control:
+        # Admin
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        
+        # Serveur
+        - { path: ^/serveur, roles: ROLE_SERVEUR }
+        
+        # Client
+        - { path: ^/client, roles: ROLE_CLIENT }
+        
+        # Dashboard
+        - { path: ^/dashboard, roles: ROLE_USER }

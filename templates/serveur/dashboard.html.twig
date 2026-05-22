@@ -1,0 +1,106 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Dashboard Serveur - Le Bistrot Français{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4">Dashboard Serveur</h1>
+    
+    <!-- Aujourd'hui -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Réservations d'aujourd'hui ({{ today|date('d/m/Y') }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if reservations|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Heure</th>
+                                        <th>Client</th>
+                                        <th>Table</th>
+                                        <th>Personnes</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reservation in reservations %}
+                                        <tr>
+                                            <td>{{ reservation.heure|date('H:i') }}</td>
+                                            <td>{{ reservation.client.nom }}</td>
+                                            <td>Table {{ reservation.restaurantTable.numero }}</td>
+                                            <td>{{ reservation.nbPersonnes }}</td>
+                                            <td>
+                                                {% if reservation.status == 'confirmée' %}
+                                                    <span class="badge bg-success">Confirmée</span>
+                                                {% elseif reservation.status == 'en_attente' %}
+                                                    <span class="badge bg-warning">En attente</span>
+                                                {% elseif reservation.status == 'annulée' %}
+                                                    <span class="badge bg-danger">Annulée</span>
+                                                {% elseif reservation.status == 'honorée' %}
+                                                    <span class="badge bg-info">Honorée</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if reservation.status == 'confirmée' %}
+                                                    <form method="POST" action="{{ path('app_serveur_reservation_honor', {'id': reservation.id}) }}" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-success">
+                                                            <i class="fas fa-check"></i> Honorée
+                                                        </button>
+                                                    </form>
+                                                    <form method="POST" action="{{ path('app_serveur_reservation_cancel', {'id': reservation.id}) }}" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Annuler cette réservation ?')">
+                                                            <i class="fas fa-times"></i> Annuler
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Aucune réservation prévue aujourd'hui.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Actions rapides -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <a href="{{ path('app_serveur_reservation_new') }}" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-plus me-2"></i>Nouvelle réservation
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <a href="{{ path('app_serveur_tables') }}" class="btn btn-warning btn-lg w-100">
+                        <i class="fas fa-chair me-2"></i>Gérer les tables
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <a href="{{ path('app_serveur_carte') }}" class="btn btn-info btn-lg w-100">
+                        <i class="fas fa-utensils me-2"></i>Voir la carte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

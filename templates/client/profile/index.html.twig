@@ -1,0 +1,265 @@
+﻿{% extends "base.html.twig" %}
+
+{% block title %}Mon profil - Le Bistrot Français{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Espace Client</h6>
+                
+                <a class="nav-link" href="{{ path('app_client_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_client_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Mes réservations
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_client_reservation_new') }}">
+                    <i class="fas fa-plus-circle"></i> Nouvelle réservation
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_client_carte') }}">
+                    <i class="fas fa-utensils"></i> Notre carte
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_client_profile') }}">
+                    <i class="fas fa-user-cog"></i> Mon profil
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-user-cog me-2"></i>
+                    Mon profil
+                </h1>
+            </div>
+
+            <!-- Messages flash -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Informations du compte</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <div class="avatar avatar-xl mb-3 mx-auto">
+                                    <div class="avatar-title bg-primary text-white rounded-circle">
+                                        {{ user.nom|first|upper }}
+                                    </div>
+                                </div>
+                                <h5>{{ user.nom }}</h5>
+                                <p class="text-muted">{{ user.email }}</p>
+                            </div>
+                            <hr>
+                            <p class="mb-2">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <strong>Membre depuis :</strong><br>
+                                {% if user.createdAt is defined and user.createdAt %}
+                                    {{ user.createdAt|date('d/m/Y') }}
+                                {% else %}
+                                    Non disponible
+                                {% endif %}
+                            </p>
+                            {% if user.phone %}
+                                <p class="mb-2">
+                                    <i class="fas fa-phone me-2"></i>
+                                    <strong>Téléphone :</strong><br>
+                                    {{ user.phone }}
+                                </p>
+                            {% endif %}
+                            <p class="mb-0">
+                                <i class="fas fa-user-tag me-2"></i>
+                                <strong>Rôle :</strong><br>
+                                Client
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiques -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Vos statistiques</h5>
+                        </div>
+                        <div class="card-body">
+                            {% set stats = {
+                                'total': user.reservations|length,
+                                'upcoming': user.reservations|filter(r => r.date|date('Y-m-d') >= "now"|date('Y-m-d') and r.status in ['en_attente', 'confirmée'])|length,
+                                'past': user.reservations|filter(r => r.date|date('Y-m-d') < "now"|date('Y-m-d') or r.status == 'honorée')|length,
+                                'cancelled': user.reservations|filter(r => r.status == 'annulée')|length
+                            } %}
+                            
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Réservations totales</span>
+                                <span class="badge bg-primary">{{ stats.total }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>À venir</span>
+                                <span class="badge bg-success">{{ stats.upcoming }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Passées</span>
+                                <span class="badge bg-secondary">{{ stats.past }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Annulées</span>
+                                <span class="badge bg-danger">{{ stats.cancelled }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions rapides -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Actions rapides</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ path('app_client_reservation_new') }}" class="btn btn-outline-primary text-start">
+                                    <i class="fas fa-plus-circle me-2"></i> Nouvelle réservation
+                                </a>
+                                <a href="{{ path('app_client_carte') }}" class="btn btn-outline-success text-start">
+                                    <i class="fas fa-utensils me-2"></i> Voir la carte
+                                </a>
+                                <a href="{{ path('app_client_reservations') }}" class="btn btn-outline-warning text-start">
+                                    <i class="fas fa-list me-2"></i> Mes réservations
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <!-- Mes réservations récentes -->
+                    {% set recentReservations = user.reservations|slice(0, 5) %}
+                    {% if recentReservations|length > 0 %}
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Mes dernières réservations</h5>
+                                <a href="{{ path('app_client_reservations') }}" class="btn btn-sm btn-outline-primary">
+                                    Voir toutes
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Heure</th>
+                                                <th>Table</th>
+                                                <th>Personnes</th>
+                                                <th>Statut</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for reservation in recentReservations %}
+                                                <tr>
+                                                    <td>{{ reservation.date|date('d/m/Y') }}</td>
+                                                    <td>{{ reservation.date|date('H:i') }}</td>
+                                                    <td>Table {{ reservation.restaurantTable.numero }}</td>
+                                                    <td>{{ reservation.nbPersonnes }}</td>
+                                                    <td>
+                                                        {% if reservation.status == 'confirmée' %}
+                                                            <span class="badge bg-success">Confirmée</span>
+                                                        {% elseif reservation.status == 'en_attente' %}
+                                                            <span class="badge bg-warning">En attente</span>
+                                                        {% elseif reservation.status == 'annulée' %}
+                                                            <span class="badge bg-danger">Annulée</span>
+                                                        {% elseif reservation.status == 'honorée' %}
+                                                            <span class="badge bg-info">Honorée</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="card">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Aucune réservation</h5>
+                                <p class="text-muted">Vous n'avez pas encore effectué de réservation.</p>
+                                <a href="{{ path('app_client_reservation_new') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle me-1"></i> Faire une réservation
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    background-color: #2c3e50;
+    min-height: calc(100vh - 56px);
+    padding-top: 1rem;
+}
+.sidebar .nav-link {
+    color: #ecf0f1;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid transparent;
+    transition: all 0.3s;
+}
+.sidebar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left-color: #3498db;
+}
+.sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(52, 152, 219, 0.2);
+    border-left-color: #3498db;
+}
+.content-area {
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 56px);
+}
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.avatar-xl {
+    width: 80px;
+    height: 80px;
+}
+.avatar-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 2rem;
+}
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+.badge {
+    font-size: 0.75em;
+    padding: 0.35em 0.65em;
+}
+</style>
+{% endblock %}

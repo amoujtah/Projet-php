@@ -1,0 +1,291 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Carte du restaurant - Serveur{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-utensils me-2"></i>
+            Carte du restaurant
+        </h1>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlatModal">
+                <i class="fas fa-plus me-1"></i> Ajouter un plat
+            </button>
+            <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#addMenuModal">
+                <i class="fas fa-layer-group me-1"></i> Ajouter un menu
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation par catégories -->
+    <nav class="nav nav-pills nav-fill mb-4">
+        <a class="nav-link active" href="#entrees" data-bs-toggle="tab">Entrées</a>
+        <a class="nav-link" href="#plats" data-bs-toggle="tab">Plats principaux</a>
+        <a class="nav-link" href="#desserts" data-bs-toggle="tab">Desserts</a>
+        <a class="nav-link" href="#boissons" data-bs-toggle="tab">Boissons</a>
+        <a class="nav-link" href="#menus" data-bs-toggle="tab">Menus</a>
+    </nav>
+
+    <!-- Contenu par catégorie -->
+    <div class="tab-content">
+        <!-- Entrées -->
+        <div class="tab-pane fade show active" id="entrees">
+            <div class="row g-4">
+                {% set entrees = plats|filter(p => p.categorie == 'entrée') %}
+                {% if entrees|length > 0 %}
+                    {% for plat in entrees %}
+                        {% include 'serveur/carte/_plat_card.html.twig' with {plat: plat} only %}
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-salad fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Aucune entrée disponible</h4>
+                        <p class="text-muted">Ajoutez votre première entrée à la carte.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Plats principaux -->
+        <div class="tab-pane fade" id="plats">
+            <div class="row g-4">
+                {% set platsPrincipaux = plats|filter(p => p.categorie == 'plat') %}
+                {% if platsPrincipaux|length > 0 %}
+                    {% for plat in platsPrincipaux %}
+                        {% include 'serveur/carte/_plat_card.html.twig' with {plat: plat} only %}
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-drumstick-bite fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Aucun plat principal disponible</h4>
+                        <p class="text-muted">Ajoutez votre premier plat principal à la carte.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Desserts -->
+        <div class="tab-pane fade" id="desserts">
+            <div class="row g-4">
+                {% set desserts = plats|filter(p => p.categorie == 'dessert') %}
+                {% if desserts|length > 0 %}
+                    {% for plat in desserts %}
+                        {% include 'serveur/carte/_plat_card.html.twig' with {plat: plat} only %}
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-ice-cream fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Aucun dessert disponible</h4>
+                        <p class="text-muted">Ajoutez votre premier dessert à la carte.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Boissons -->
+        <div class="tab-pane fade" id="boissons">
+            <div class="row g-4">
+                {% set boissons = plats|filter(p => p.categorie == 'boisson') %}
+                {% if boissons|length > 0 %}
+                    {% for plat in boissons %}
+                        {% include 'serveur/carte/_plat_card.html.twig' with {plat: plat} only %}
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-wine-glass-alt fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Aucune boisson disponible</h4>
+                        <p class="text-muted">Ajoutez votre première boisson à la carte.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Menus -->
+        <div class="tab-pane fade" id="menus">
+            <div class="row g-4">
+                {% if menus|length > 0 %}
+                    {% for menu in menus %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">{{ menu.nom }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ menu.description }}</p>
+                                    <h6 class="text-info">{{ menu.prixTotal }} €</h6>
+                                    <hr>
+                                    <h6>Plats inclus :</h6>
+                                    <ul class="list-unstyled small">
+                                        {% for plat in menu.plats %}
+                                            <li class="mb-1">
+                                                <i class="fas fa-check text-success me-1"></i>
+                                                {{ plat.nom }} ({{ plat.categorie }})
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <button type="button" class="btn btn-sm btn-outline-info w-100"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editMenuModal{{ menu.id }}">
+                                        <i class="fas fa-edit me-1"></i> Modifier
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Modal modification menu -->
+                            <div class="modal fade" id="editMenuModal{{ menu.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{{ path('app_serveur_menu_edit', {'id': menu.id}) }}">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Modifier le menu</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="menu_nom{{ menu.id }}" class="form-label">Nom du menu</label>
+                                                    <input type="text" class="form-control" id="menu_nom{{ menu.id }}" 
+                                                           name="nom" value="{{ menu.nom }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="menu_prix{{ menu.id }}" class="form-label">Prix total (€)</label>
+                                                    <input type="number" class="form-control" id="menu_prix{{ menu.id }}" 
+                                                           name="prix" value="{{ menu.prixTotal }}" step="0.01" min="0" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Plats inclus</label>
+                                                    <div class="row">
+                                                        {% for plat in plats %}
+                                                            <div class="col-md-6">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" 
+                                                                           id="menu_plat{{ menu.id }}_{{ plat.id }}" 
+                                                                           name="plats[]" 
+                                                                           value="{{ plat.id }}"
+                                                                           {% if plat in menu.plats %}checked{% endif %}>
+                                                                    <label class="form-check-label" for="menu_plat{{ menu.id }}_{{ plat.id }}">
+                                                                        {{ plat.nom }} ({{ plat.categorie }})
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-layer-group fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Aucun menu disponible</h4>
+                        <p class="text-muted">Créez votre premier menu.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Plat -->
+<div class="modal fade" id="addPlatModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ path('app_serveur_plat_add') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter un nouveau plat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nom" class="form-label">Nom du plat *</label>
+                        <input type="text" class="form-control" id="nom" name="nom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categorie" class="form-label">Catégorie *</label>
+                        <select class="form-select" id="categorie" name="categorie" required>
+                            <option value="">Choisir une catégorie</option>
+                            <option value="entrée">Entrée</option>
+                            <option value="plat">Plat principal</option>
+                            <option value="dessert">Dessert</option>
+                            <option value="boisson">Boisson</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prix" class="form-label">Prix (€) *</label>
+                        <input type="number" class="form-control" id="prix" name="prix" step="0.01" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Menu -->
+<div class="modal fade" id="addMenuModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ path('app_serveur_menu_add') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter un nouveau menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="menu_nom" class="form-label">Nom du menu *</label>
+                        <input type="text" class="form-control" id="menu_nom" name="nom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="menu_prix" class="form-label">Prix total (€) *</label>
+                        <input type="number" class="form-control" id="menu_prix" name="prix" step="0.01" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Plats inclus *</label>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Sélectionnez au moins un plat pour composer le menu
+                        </div>
+                        <div class="row">
+                            {% for plat in plats %}
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="add_menu_plat{{ plat.id }}" 
+                                               name="plats[]" 
+                                               value="{{ plat.id }}">
+                                        <label class="form-check-label" for="add_menu_plat{{ plat.id }}">
+                                            {{ plat.nom }} ({{ plat.categorie }}) - {{ plat.prix }} €
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Créer le menu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

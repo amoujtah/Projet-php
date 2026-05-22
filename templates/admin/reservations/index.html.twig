@@ -1,0 +1,400 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Gestion des réservations - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Administration</h6>
+                
+                <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_tables') }}">
+                    <i class="fas fa-chair"></i> Gestion des tables
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_plats') }}">
+                    <i class="fas fa-utensils"></i> Gestion des plats
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_menus') }}">
+                    <i class="fas fa-clipboard-list"></i> Gestion des menus
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_users') }}">
+                    <i class="fas fa-users"></i> Gestion des utilisateurs
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_admin_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Réservations
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Gestion des réservations
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="printReservations()">
+                            <i class="fas fa-print me-2"></i>Imprimer
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="exportCSV()">
+                            <i class="fas fa-download me-2"></i>Exporter
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Réservations -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Liste des réservations</h5>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-success">{{ reservations|filter(r => r.status == 'confirmée')|length }} confirmées</span>
+                            <span class="badge bg-warning">{{ reservations|filter(r => r.status == 'en_attente')|length }} en attente</span>
+                            <span class="badge bg-danger">{{ reservations|filter(r => r.status == 'annulée')|length }} annulées</span>
+                            <span class="badge bg-info">{{ reservations|filter(r => r.status == 'honorée')|length }} honorées</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="reservationsTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Client</th>
+                                    <th>Date & Heure</th>
+                                    <th>Table</th>
+                                    <th>Personnes</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reservation in reservations %}
+                                <tr>
+                                    <td>#{{ reservation.id }}</td>
+                                    <td>
+                                        <strong>{{ reservation.client.nom }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ reservation.client.email }}</small>
+                                        {% if reservation.client.phone %}
+                                        <br>
+                                        <small class="text-muted">{{ reservation.client.phone }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ reservation.date|date('d/m/Y') }}
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ reservation.date|date('H:i') }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            Table {{ reservation.restaurantTable.numero }}
+                                        </span>
+                                        <br>
+                                        <small>{{ reservation.restaurantTable.capacite }} places</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            {{ reservation.nbPersonnes }} pers.
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if reservation.status == 'confirmée' %}
+                                            <span class="badge bg-success">Confirmée</span>
+                                        {% elseif reservation.status == 'en_attente' %}
+                                            <span class="badge bg-warning">En attente</span>
+                                        {% elseif reservation.status == 'annulée' %}
+                                            <span class="badge bg-danger">Annulée</span>
+                                        {% elseif reservation.status == 'honorée' %}
+                                            <span class="badge bg-info">Honorée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <form method="POST" action="{{ path('app_admin_reservation_status', {'id': reservation.id}) }}" 
+                                                          id="statusForm{{ reservation.id }}" class="d-inline">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('status' ~ reservation.id) }}">
+                                                        <input type="hidden" name="status" id="statusField{{ reservation.id }}">
+                                                    </form>
+                                                    <a class="dropdown-item" href="#" 
+                                                       onclick="document.getElementById('statusField{{ reservation.id }}').value='confirmée'; 
+                                                                document.getElementById('statusForm{{ reservation.id }}').submit();">
+                                                        <i class="fas fa-check text-success me-2"></i>Confirmer
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" 
+                                                       onclick="document.getElementById('statusField{{ reservation.id }}').value='en_attente'; 
+                                                                document.getElementById('statusForm{{ reservation.id }}').submit();">
+                                                        <i class="fas fa-clock text-warning me-2"></i>Mettre en attente
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" 
+                                                       onclick="document.getElementById('statusField{{ reservation.id }}').value='annulée'; 
+                                                                document.getElementById('statusForm{{ reservation.id }}').submit();">
+                                                        <i class="fas fa-times text-danger me-2"></i>Annuler
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" 
+                                                       onclick="document.getElementById('statusField{{ reservation.id }}').value='honorée'; 
+                                                                document.getElementById('statusForm{{ reservation.id }}').submit();">
+                                                        <i class="fas fa-star text-info me-2"></i>Marquer comme honorée
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <button type="button" class="dropdown-item" 
+                                                            data-bs-toggle="modal" data-bs-target="#detailsModal{{ reservation.id }}">
+                                                        <i class="fas fa-eye me-2"></i>Voir les détails
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <form method="POST" action="{{ path('app_admin_reservation_delete', {'id': reservation.id}) }}" 
+                                                          id="deleteForm{{ reservation.id }}" 
+                                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?');"
+                                                          class="d-inline">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.id) }}">
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            <i class="fas fa-trash me-2"></i>Supprimer
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Modal pour les détails -->
+                                <div class="modal fade" id="detailsModal{{ reservation.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Détails de la réservation #{{ reservation.id }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <h6>Client</h6>
+                                                        <p class="mb-1"><strong>{{ reservation.client.nom }}</strong></p>
+                                                        <p class="mb-1">{{ reservation.client.email }}</p>
+                                                        {% if reservation.client.phone %}
+                                                        <p class="mb-0">{{ reservation.client.phone }}</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <h6>Réservation</h6>
+                                                        <p class="mb-1"><strong>Date:</strong> {{ reservation.date|date('d/m/Y') }}</p>
+                                                        <p class="mb-1"><strong>Heure:</strong> {{ reservation.date|date('H:i') }}</p>
+                                                        <p class="mb-0"><strong>Personnes:</strong> {{ reservation.nbPersonnes }}</p>
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <h6>Table</h6>
+                                                        <p class="mb-1"><strong>Numéro:</strong> Table {{ reservation.restaurantTable.numero }}</p>
+                                                        <p class="mb-1"><strong>Capacité:</strong> {{ reservation.restaurantTable.capacite }} places</p>
+                                                        <p class="mb-0"><strong>Statut:</strong> 
+                                                            {% if reservation.restaurantTable.status %}
+                                                            <span class="badge bg-success">Libre</span>
+                                                            {% else %}
+                                                            <span class="badge bg-danger">Occupée</span>
+                                                            {% endif %}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <h6>Informations supplémentaires</h6>
+                                                        <p class="mb-0 text-muted">Aucune note supplémentaire</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <i class="fas fa-calendar-times fa-2x text-muted mb-3"></i>
+                                        <p class="text-muted mb-0">Aucune réservation trouvée</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            Total : {{ reservations|length }} réservations
+                        </small>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#">Précédent</a>
+                                </li>
+                                <li class="page-item active">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">3</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Suivant</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // Exporter en CSV
+    function exportCSV() {
+        const rows = document.querySelectorAll('#reservationsTable tbody tr');
+        let csv = 'ID,Client,Email,Téléphone,Date,Heure,Table,Capacité,Personnes,Statut\n';
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 7) {
+                const id = cells[0].textContent.trim();
+                
+                // Client info
+                const clientName = cells[1].querySelector('strong')?.textContent.trim() || '';
+                const email = cells[1].querySelector('small:nth-of-type(1)')?.textContent.trim() || '';
+                const phone = cells[1].querySelector('small:nth-of-type(2)')?.textContent.trim() || '';
+                
+                // Date and time
+                const dateDiv = cells[2].querySelector('div:nth-child(1)');
+                const timeDiv = cells[2].querySelector('div:nth-child(2)');
+                const dateText = dateDiv?.textContent || '';
+                const timeText = timeDiv?.textContent || '';
+                const date = dateText.replace(/\s+/g, ' ').trim().replace(/\s+/g, '');
+                const time = timeText.replace(/\s+/g, ' ').trim().replace(/\s+/g, '');
+                
+                // Table info
+                const tableBadge = cells[3].querySelector('.badge');
+                const tableCapacity = cells[3].querySelector('small');
+                const table = tableBadge?.textContent.trim() || '';
+                const capacity = tableCapacity?.textContent.trim() || '';
+                
+                // People count
+                const peopleBadge = cells[4].querySelector('.badge');
+                const people = peopleBadge?.textContent.trim() || '';
+                
+                // Status
+                const statusBadge = cells[5].querySelector('.badge');
+                const status = statusBadge?.textContent.trim() || '';
+                
+                csv += `${id},"${clientName}","${email}","${phone}","${date}","${time}","${table}","${capacity}","${people}","${status}"\n`;
+            }
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reservations_' + new Date().toISOString().split('T')[0] + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+    
+    // Imprimer
+    function printReservations() {
+        const printWindow = window.open('', '_blank');
+        const table = document.getElementById('reservationsTable');
+        
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Liste des réservations</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f4f4f4; }
+                        .badge { padding: 3px 8px; border-radius: 3px; font-size: 12px; display: inline-block; }
+                        .bg-success { background-color: #d4edda; color: #155724; }
+                        .bg-warning { background-color: #fff3cd; color: #856404; }
+                        .bg-danger { background-color: #f8d7da; color: #721c24; }
+                        .bg-info { background-color: #cce5ff; color: #004085; }
+                        .bg-secondary { background-color: #e2e3e5; color: #383d41; }
+                        h1 { color: #333; text-align: center; }
+                        .header { margin-bottom: 30px; }
+                        .date { text-align: center; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Liste des réservations</h1>
+                        <p class="date">Date d'impression : ${new Date().toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    ${table.outerHTML}
+                    <script>
+                        window.onload = function() { window.print(); }
+                    <\/script>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+</script>
+
+<style>
+.badge {
+    font-size: 0.85em;
+    padding: 4px 8px;
+}
+.dropdown-menu {
+    min-width: 200px;
+}
+.modal-backdrop {
+    z-index: 1040;
+}
+.modal {
+    z-index: 1050;
+}
+</style>
+{% endblock %}

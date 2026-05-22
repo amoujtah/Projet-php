@@ -1,0 +1,189 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Notre Carte - Le Bistrot Français{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="section-title d-inline-block">Notre Carte Gastronomique</h1>
+        <p class="lead">Des produits frais, une cuisine créative</p>
+    </div>
+
+    <!-- Navigation de la carte -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <a href="#entrees" class="btn btn-outline-primary active">Entrées</a>
+                        <a href="#plats" class="btn btn-outline-primary">Plats principaux</a>
+                        <a href="#desserts" class="btn btn-outline-primary">Desserts</a>
+                        <a href="#vins" class="btn btn-outline-primary">Carte des vins</a>
+                        <a href="#menus" class="btn btn-outline-primary">Menus</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entrées -->
+    <section id="entrees" class="mb-5">
+        <h2 class="section-title mb-4">
+            <i class="fas fa-seedling me-2"></i>Entrées
+        </h2>
+        <div class="row">
+            {% for plat in platsParCategorie.entree|default([]) %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="card-title mb-1">{{ plat.nom }}</h5>
+                                <p class="card-text text-muted small">{{ plat.description }}</p>
+                            </div>
+                            <span class="badge bg-light text-dark fs-6">{{ plat.prix }} €</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Notre sélection d'entrées sera bientôt disponible.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Plats principaux -->
+    <section id="plats" class="mb-5">
+        <h2 class="section-title mb-4">
+            <i class="fas fa-utensils me-2"></i>Plats principaux
+        </h2>
+        <div class="row">
+            {% for plat in platsParCategorie.plat_principal|default([]) %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="card-title mb-1">{{ plat.nom }}</h5>
+                                <p class="card-text text-muted small">{{ plat.description }}</p>
+                            </div>
+                            <span class="badge bg-light text-dark fs-6">{{ plat.prix }} €</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nos plats principaux seront bientôt en ligne.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Desserts -->
+    <section id="desserts" class="mb-5">
+        <h2 class="section-title mb-4">
+            <i class="fas fa-ice-cream me-2"></i>Desserts
+        </h2>
+        <div class="row">
+            {% for plat in platsParCategorie.dessert|default([]) %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="card-title mb-1">{{ plat.nom }}</h5>
+                                <p class="card-text text-muted small">{{ plat.description }}</p>
+                            </div>
+                            <span class="badge bg-light text-dark fs-6">{{ plat.prix }} €</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nos desserts maison seront bientôt disponibles.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Menus -->
+    {% if menus|length > 0 %}
+    <section id="menus" class="mb-5">
+        <h2 class="section-title mb-4">
+            <i class="fas fa-star me-2"></i>Menus découverte
+        </h2>
+        <div class="row">
+            {% for menu in menus %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ menu.nom }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <span class="display-6 fw-bold" style="color: var(--primary-color);">
+                                {{ menu.prixTotal }} €
+                            </span>
+                            <p class="text-muted small">par personne</p>
+                        </div>
+                        <ul class="list-unstyled">
+                            {% for plat in menu.plats|slice(0, 3) %}
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                {{ plat.nom }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {{ menu.description|default('Sélection de nos meilleures créations') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <button class="btn btn-outline-primary w-100">
+                            <i class="fas fa-shopping-cart me-2"></i>Sélectionner ce menu
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Informations -->
+    <div class="alert alert-light border mt-5">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="mb-1">
+                    <i class="fas fa-info-circle me-2"></i>À savoir
+                </h5>
+                <p class="mb-0 small">
+                    Tous nos plats sont préparés sur place avec des produits frais. 
+                    N'hésitez pas à nous consulter pour les allergies alimentaires.
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_public_reserver') }}" class="btn btn-primary">
+                    <i class="fas fa-calendar-alt me-2"></i>Réserver une table
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

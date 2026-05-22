@@ -1,0 +1,298 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Statistiques - Serveur{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-chart-bar me-2"></i>
+            Statistiques
+        </h1>
+        <div class="btn-group">
+            <a href="{{ path('app_serveur_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Retour
+            </a>
+            <button type="button" class="btn btn-primary ms-2" onclick="window.print()">
+                <i class="fas fa-print me-1"></i> Imprimer
+            </button>
+        </div>
+    </div>
+
+    <!-- Cartes de statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-1">Réservations aujourd'hui</h6>
+                            <h2 class="mb-0">{{ today_reservations }}</h2>
+                            <small>Confirmées : {{ today_reservations }}/{{ today_total_reservations }}</small>
+                        </div>
+                        <i class="fas fa-calendar-day fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-1">Réservations ce mois</h6>
+                            <h2 class="mb-0">{{ month_reservations }}</h2>
+                            <small>{{ today|date('F Y') }}</small>
+                        </div>
+                        <i class="fas fa-calendar-alt fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-1">Tables disponibles</h6>
+                            <h2 class="mb-0">{{ available_tables }}</h2>
+                            <small>Sur {{ total_tables }} total</small>
+                        </div>
+                        <i class="fas fa-chair fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-1">Taux d'occupation</h6>
+                            <h2 class="mb-0">
+                                {% if total_tables > 0 %}
+                                    {{ ((occupied_tables / total_tables) * 100)|round(0) }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </h2>
+                            <small>{{ occupied_tables }} tables occupées</small>
+                        </div>
+                        <i class="fas fa-percentage fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Statut des réservations aujourd'hui</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Répartition des tables</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="tablesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau récapitulatif -->
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0">Récapitulatif des réservations aujourd'hui</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Statut</th>
+                            <th>Nombre</th>
+                            <th>Pourcentage</th>
+                            <th>Détails</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for status in status_summary %}
+                            <tr>
+                                <td>
+                                    {% if status.status == 'confirmée' %}
+                                        <span class="badge bg-success">Confirmée</span>
+                                    {% elseif status.status == 'en_attente' %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% elseif status.status == 'annulée' %}
+                                        <span class="badge bg-danger">Annulée</span>
+                                    {% elseif status.status == 'honorée' %}
+                                        <span class="badge bg-info">Honorée</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ status.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ status.count }}</td>
+                                <td>
+                                    {% if today_total_reservations > 0 %}
+                                        {{ ((status.count / today_total_reservations) * 100)|round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">Voir</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="table-light">
+                            <td><strong>Total</strong></td>
+                            <td><strong>{{ today_total_reservations }}</strong></td>
+                            <td><strong>100%</strong></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommandations -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i> Recommandations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Tables :</h6>
+                            <ul>
+                                {% if available_tables < total_tables * 0.3 %}
+                                    <li class="text-danger">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Seulement {{ available_tables }} tables disponibles
+                                    </li>
+                                {% else %}
+                                    <li class="text-success">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Bonne disponibilité des tables
+                                    </li>
+                                {% endif %}
+                                {% if occupied_tables > total_tables * 0.8 %}
+                                    <li class="text-warning">
+                                        <i class="fas fa-clock me-2"></i>
+                                        Occupation élevée ({{ ((occupied_tables / total_tables) * 100)|round(0) }}%)
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Réservations :</h6>
+                            <ul>
+                                {% set confirmed_rate = (today_reservations / today_total_reservations * 100)|default(0)|round(0) %}
+                                {% if confirmed_rate < 70 %}
+                                    <li class="text-warning">
+                                        <i class="fas fa-envelope me-2"></i>
+                                        Taux de confirmation bas ({{ confirmed_rate }}%)
+                                    </li>
+                                {% endif %}
+                                {% if month_reservations < 50 %}
+                                    <li class="text-info">
+                                        <i class="fas fa-calendar-plus me-2"></i>
+                                        Activité mensuelle modérée
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Données pour le graphique des statuts
+    const statusData = {
+        labels: [
+            {% for status in status_summary %}
+                '{{ status.status|capitalize }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for status in status_summary %}
+                    {{ status.count }},
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#28a745', // Confirmée - vert
+                '#ffc107', // En attente - jaune
+                '#dc3545', // Annulée - rouge
+                '#17a2b8', // Honorée - bleu
+                '#6c757d'  // Autre - gris
+            ]
+        }]
+    };
+
+    // Données pour le graphique des tables
+    const tablesData = {
+        labels: ['Tables occupées', 'Tables libres'],
+        datasets: [{
+            data: [{{ occupied_tables }}, {{ available_tables }}],
+            backgroundColor: ['#dc3545', '#28a745']
+        }]
+    };
+
+    // Configuration des graphiques
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    };
+
+    // Création des graphiques
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: statusData,
+        options: chartOptions
+    });
+
+    const tablesCtx = document.getElementById('tablesChart').getContext('2d');
+    new Chart(tablesCtx, {
+        type: 'pie',
+        data: tablesData,
+        options: chartOptions
+    });
+});
+</script>
+{% endblock %}

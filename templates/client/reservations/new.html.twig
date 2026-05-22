@@ -1,0 +1,355 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Nouvelle réservation - Le Bistrot Français{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Espace Client</h6>
+                
+                <a class="nav-link" href="{{ path('app_client_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_client_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Mes réservations
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_client_reservation_new') }}">
+                    <i class="fas fa-plus-circle"></i> Nouvelle réservation
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_client_carte') }}">
+                    <i class="fas fa-utensils"></i> Notre carte
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_client_profile') }}">
+                    <i class="fas fa-user-cog"></i> Mon profil
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Nouvelle réservation
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ path('app_client_reservations') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Retour
+                    </a>
+                </div>
+            </div>
+
+            <!-- Messages flash -->
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Réserver une table</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                            
+                            <!-- MODIFICATION ICI : Un seul champ date/heure -->
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    {{ form_row(form.date, {
+                                        'attr': {'class': 'form-control datetimepicker'},
+                                        'label': 'Date et heure de réservation'
+                                    }) }}
+                                    <small class="form-text text-muted">
+                                        Format: JJ/MM/AAAA HH:MM
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form_row(form.nbPersonnes, {
+                                        'attr': {'class': 'form-control'},
+                                        'label': 'Nombre de personnes'
+                                    }) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.restaurantTable, {
+                                        'attr': {'class': 'form-control'},
+                                        'label': 'Table'
+                                    }) }}
+                                    <small class="form-text text-muted">
+                                        Sélectionnez une table disponible pour cette date et heure
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ path('app_client_reservations') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check me-1"></i> Réserver
+                                </button>
+                            </div>
+                            
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <!-- Informations sur les tables -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Liste des tables</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Table</th>
+                                            <th>Capacité</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for table in tables %}
+                                            <tr>
+                                                <td>#{{ table.numero }}</td>
+                                                <td>{{ table.capacite }} pers.</td>
+                                                <td>
+                                                    {% if table.status %}
+                                                        <span class="badge bg-success">Disponible</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">Occupée</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Le statut "Disponible" indique que la table est généralement libre, mais la disponibilité exacte dépend de la date et heure sélectionnées.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Instructions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Comment réserver ?</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Choisissez une date et une heure</strong><br>
+                                    <small class="text-muted">Notre restaurant est ouvert tous les jours</small>
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Sélectionnez le nombre de personnes</strong><br>
+                                    <small class="text-muted">
+                                        De 1 à 
+                                        {% set maxCapacity = 0 %}
+                                        {% for table in tables %}
+                                            {% if table.capacite > maxCapacity %}
+                                                {% set maxCapacity = table.capacite %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {{ maxCapacity }} personnes par table
+                                    </small>
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Choisissez une table disponible</strong><br>
+                                    <small class="text-muted">Le système vérifie automatiquement la disponibilité</small>
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Confirmez votre réservation</strong><br>
+                                    <small class="text-muted">Vous recevrez une confirmation par email</small>
+                                </li>
+                            </ol>
+                            <hr>
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-clock me-2"></i>
+                                <strong>Heures d'ouverture :</strong><br>
+                                Lundi - Vendredi: 12h-14h, 19h-22h<br>
+                                Samedi - Dimanche: 12h-15h, 19h-23h
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.needs-validation .form-control:invalid {
+    border-color: #dc3545;
+}
+.needs-validation .form-control:valid {
+    border-color: #198754;
+}
+.sidebar {
+    background-color: #2c3e50;
+    min-height: calc(100vh - 56px);
+    padding-top: 1rem;
+}
+.sidebar .nav-link {
+    color: #ecf0f1;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid transparent;
+    transition: all 0.3s;
+}
+.sidebar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left-color: #3498db;
+}
+.sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(52, 152, 219, 0.2);
+    border-left-color: #3498db;
+}
+.content-area {
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 56px);
+}
+.badge {
+    font-size: 0.75em;
+    padding: 0.35em 0.65em;
+}
+</style>
+
+<!-- Flatpickr pour le datetime picker -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser Flatpickr pour le datetime picker
+    flatpickr(".datetimepicker", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true,
+        locale: "fr",
+        minDate: "today",
+        minuteIncrement: 30,
+        defaultHour: 19,
+        defaultMinute: 0,
+        disableMobile: true
+    });
+    
+    // Récupérer les éléments du formulaire
+    const dateInput = document.getElementById('reservation_date');
+    const peopleInput = document.getElementById('reservation_nbPersonnes');
+    const tableSelect = document.getElementById('reservation_restaurantTable');
+    
+    // Définir la date minimale (aujourd'hui)
+    if (dateInput) {
+        const today = new Date();
+        const formattedDate = today.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:mm
+        dateInput.min = formattedDate;
+        
+        // Si aucune date n'est sélectionnée, définir aujourd'hui à 19:00
+        if (!dateInput.value) {
+            const defaultDate = new Date();
+            defaultDate.setHours(19, 0, 0);
+            dateInput.value = defaultDate.toISOString().slice(0, 16);
+        }
+    }
+    
+    // Validation du formulaire
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+            
+            // Validation supplémentaire pour le nombre de personnes
+            if (peopleInput && tableSelect) {
+                const selectedTableId = tableSelect.value;
+                const selectedOption = tableSelect.options[tableSelect.selectedIndex];
+                const tableCapacity = selectedOption ? parseInt(selectedOption.getAttribute('data-capacity') || 0) : 0;
+                const peopleCount = parseInt(peopleInput.value);
+                
+                if (selectedTableId && tableCapacity && peopleCount > tableCapacity) {
+                    e.preventDefault();
+                    alert(`La table sélectionnée ne peut accueillir que ${tableCapacity} personnes. Veuillez choisir une table plus grande ou réduire le nombre de personnes.`);
+                    return false;
+                }
+            }
+        }, false);
+    }
+    
+    // Ajouter l'attribut data-capacity aux options de table
+    if (tableSelect) {
+        {% for table in tables %}
+            const option = tableSelect.querySelector('option[value="{{ table.id }}"]');
+            if (option) {
+                option.setAttribute('data-capacity', '{{ table.capacite }}');
+                option.setAttribute('data-table-number', '{{ table.numero }}');
+                option.setAttribute('data-status', '{{ table.status ? "disponible" : "indisponible" }}');
+            }
+        {% endfor %}
+    }
+    
+    // Filtrer les tables par capacité quand le nombre de personnes change
+    if (peopleInput && tableSelect) {
+        peopleInput.addEventListener('input', function() {
+            const peopleCount = parseInt(this.value) || 0;
+            const options = tableSelect.options;
+            
+            for (let i = 0; i < options.length; i++) {
+                const capacity = parseInt(options[i].getAttribute('data-capacity') || 0);
+                if (capacity && capacity < peopleCount) {
+                    options[i].style.display = 'none';
+                    options[i].disabled = true;
+                } else {
+                    options[i].style.display = '';
+                    options[i].disabled = false;
+                }
+            }
+            
+            // Si l'option sélectionnée est désactivée, sélectionner la première disponible
+            if (tableSelect.options[tableSelect.selectedIndex].disabled) {
+                for (let i = 0; i < options.length; i++) {
+                    if (!options[i].disabled) {
+                        tableSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

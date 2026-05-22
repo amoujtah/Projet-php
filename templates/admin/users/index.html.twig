@@ -1,0 +1,323 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Gestion des utilisateurs - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Administration</h6>
+                
+                <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_tables') }}">
+                    <i class="fas fa-chair"></i> Gestion des tables
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_plats') }}">
+                    <i class="fas fa-utensils"></i> Gestion des plats
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_menus') }}">
+                    <i class="fas fa-clipboard-list"></i> Gestion des menus
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_admin_users') }}">
+                    <i class="fas fa-users"></i> Gestion des utilisateurs
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Réservations
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Gestion des utilisateurs
+                </h1>
+                <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Nouvel utilisateur
+                </a>
+            </div>
+            
+            <!-- Filtres par type -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{{ path('app_admin_users_by_type', {'type': 'admin'}) }}" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-user-shield"></i> Administrateurs
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ path('app_admin_users_by_type', {'type': 'serveur'}) }}" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-concierge-bell"></i> Serveurs
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ path('app_admin_users_by_type', {'type': 'client'}) }}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-user"></i> Clients
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ path('app_admin_users') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-users"></i> Tous
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tableau des utilisateurs -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Liste des utilisateurs ({{ users|length }})</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if users|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Utilisateur</th>
+                                    <th>Email</th>
+                                    <th>Téléphone</th>
+                                    <th>Type</th>
+                                    <th>Inscription</th>
+                                    <th>Réservations</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>#{{ user.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3 bg-{{ 
+                                                user.type == 'admin' ? 'danger' : 
+                                                (user.type == 'serveur' ? 'warning' : 'success') 
+                                            }}">
+                                                {{ user.nom|first|upper }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ user.nom }}</strong>
+                                                {% if user == app.user %}
+                                                    <span class="badge bg-info ms-2">Vous</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.phone ? user.phone : '-' }}</td>
+                                    <td>
+                                        {% if user.type == 'admin' %}
+                                            <span class="badge bg-danger">Administrateur</span>
+                                        {% elseif user.type == 'serveur' %}
+                                            <span class="badge bg-warning text-dark">Serveur</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Client</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ user.createdAt|date('d/m/Y H:i') }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ user.reservations|length > 0 ? 'primary' : 'secondary' }}">
+                                            {{ user.reservations|length }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ path('app_admin_user_edit', {'id': user.id}) }}" class="btn btn-outline-warning" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            
+                                            {% if user != app.user %}
+                                                <!-- Option 1: Si on utilise la méthode qui empêche TOUTE suppression avec réservations -->
+                                                {% if user.reservations|length > 0 %}
+                                                    <!-- Bouton désactivé pour TOUS les utilisateurs avec réservations -->
+                                                    <button class="btn btn-outline-secondary" disabled 
+                                                            title="Cet utilisateur a {{ user.reservations|length }} réservation(s)">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <!-- Bouton de suppression normal pour utilisateurs SANS réservations -->
+                                                    <form method="post" 
+                                                          action="{{ path('app_admin_user_delete', {'id': user.id}) }}" 
+                                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');"
+                                                          style="display: inline;">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                        <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            {% else %}
+                                                <!-- Bouton désactivé pour l'utilisateur courant -->
+                                                <button class="btn btn-outline-secondary" disabled title="Vous ne pouvez pas vous supprimer">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucun utilisateur trouvé</h5>
+                        <p class="text-muted mb-0">Il n'y a pas encore d'utilisateur enregistré.</p>
+                        <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary mt-3">
+                            <i class="fas fa-user-plus me-2"></i>Créer un utilisateur
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Statistiques -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-white-50 mb-2">Total</h6>
+                                    <h3 class="mb-0">{{ users|length }}</h3>
+                                </div>
+                                <i class="fas fa-users fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-white-50 mb-2">Clients</h6>
+                                    <h3 class="mb-0">
+                                        {% set clientCount = 0 %}
+                                        {% for user in users %}
+                                            {% if user.type == 'client' %}
+                                                {% set clientCount = clientCount + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {{ clientCount }}
+                                    </h3>
+                                </div>
+                                <i class="fas fa-user fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-white-50 mb-2">Serveurs</h6>
+                                    <h3 class="mb-0">
+                                        {% set serveurCount = 0 %}
+                                        {% for user in users %}
+                                            {% if user.type == 'serveur' %}
+                                                {% set serveurCount = serveurCount + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {{ serveurCount }}
+                                    </h3>
+                                </div>
+                                <i class="fas fa-concierge-bell fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-white-50 mb-2">Administrateurs</h6>
+                                    <h3 class="mb-0">
+                                        {% set adminCount = 0 %}
+                                        {% for user in users %}
+                                            {% if user.type == 'admin' %}
+                                                {% set adminCount = adminCount + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {{ adminCount }}
+                                    </h3>
+                                </div>
+                                <i class="fas fa-user-shield fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.user-avatar.bg-danger { background-color: #dc3545; }
+.user-avatar.bg-warning { background-color: #ffc107; color: #212529; }
+.user-avatar.bg-success { background-color: #28a745; }
+.user-avatar.bg-info { background-color: #17a2b8; }
+.sidebar {
+    background-color: #343a40;
+    min-height: calc(100vh - 56px);
+    padding-top: 1rem;
+}
+.sidebar .nav-link {
+    color: rgba(255,255,255,.8);
+    padding: 0.5rem 1rem;
+    margin: 0.1rem 0;
+}
+.sidebar .nav-link:hover {
+    background-color: rgba(255,255,255,.1);
+    color: white;
+}
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
+.content-area {
+    padding-top: 1rem;
+}
+.badge {
+    font-size: 0.85em;
+    padding: 0.35em 0.65em;
+}
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

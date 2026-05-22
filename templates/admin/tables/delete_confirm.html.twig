@@ -1,0 +1,227 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Confirmer la suppression - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Administration</h6>
+                
+                <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_admin_tables') }}">
+                    <i class="fas fa-chair"></i> Gestion des tables
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_plats') }}">
+                    <i class="fas fa-utensils"></i> Gestion des plats
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_menus') }}">
+                    <i class="fas fa-clipboard-list"></i> Gestion des menus
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_users') }}">
+                    <i class="fas fa-users"></i> Gestion des utilisateurs
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Réservations
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                    Confirmer la suppression
+                </h1>
+                <a href="{{ path('app_admin_tables') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+            
+            {% if table.reservations|length > 0 %}
+            <div class="alert alert-danger">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+                    <div>
+                        <h5 class="alert-heading mb-1">Attention !</h5>
+                        <p class="mb-0">Cette table a {{ table.reservations|length }} réservation(s) associée(s).</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-{{ table.reservations|length > 0 ? 'danger' : 'warning' }} text-white">
+                            <h5 class="mb-0">Table à supprimer</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-chair fa-3x text-{{ table.reservations|length > 0 ? 'danger' : 'warning' }} mb-3"></i>
+                                <h3>Table {{ table.numero }}</h3>
+                                <div class="mb-3">
+                                    <span class="badge bg-info">{{ table.capacite }} personnes</span>
+                                    <span class="badge bg-{{ table.status ? 'success' : 'danger' }} ms-2">
+                                        {{ table.status ? 'Disponible' : 'Indisponible' }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {% if table.reservations|length > 0 %}
+                            <div class="mb-3">
+                                <h6>Réservations associées :</h6>
+                                <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                                    {% for reservation in table.reservations %}
+                                    <div class="border-bottom py-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="fw-medium">{{ reservation.client.nom }}</span>
+                                            <span class="text-muted">{{ reservation.nbPersonnes }} pers.</span>
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ reservation.date|date('d/m/Y') }} à {{ reservation.heure|date('H:i') }}
+                                        </small>
+                                        <br>
+                                        <small>
+                                            <span class="badge 
+                                                {% if reservation.status == 'confirmée' %}bg-success
+                                                {% elseif reservation.status == 'en_attente' %}bg-warning
+                                                {% else %}bg-danger{% endif %}">
+                                                {{ reservation.status }}
+                                            </span>
+                                        </small>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Cette table n'a aucune réservation associée.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    {% if table.reservations|length > 0 %}
+                    <!-- Option 1: Supprimer tout -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-danger">
+                            <h5 class="mb-0 text-white">Option 1 : Suppression complète</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning mb-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Action irréversible</strong>
+                                <p class="mb-0 mt-2">Cette option supprimera :</p>
+                                <ul class="mb-0">
+                                    <li>La table {{ table.numero }}</li>
+                                    <li>{{ table.reservations|length }} réservation(s) associée(s)</li>
+                                </ul>
+                            </div>
+                            <div class="d-grid">
+                                <a href="{{ path('app_admin_table_delete', {'id': table.id, 'action': 'delete_all'}) }}" 
+                                   class="btn btn-danger"
+                                   onclick="return confirm('Êtes-vous ABSOLUMENT sûr ? Cette action ne peut pas être annulée.')">
+                                    <i class="fas fa-trash me-2"></i>Supprimer table et réservations
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Option 2: Transférer les réservations -->
+                    {% if otherTables|length > 0 %}
+                    <div class="card">
+                        <div class="card-header bg-warning">
+                            <h5 class="mb-0">Option 2 : Transférer les réservations</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-exchange-alt me-2"></i>
+                                <strong>Option recommandée</strong>
+                                <p class="mb-0 mt-2">Cette option transférera les {{ table.reservations|length }} réservation(s) vers une autre table.</p>
+                            </div>
+                            
+                            <form action="{{ path('app_admin_table_delete', {'id': table.id, 'action': 'transfer'}) }}" 
+                                  method="post">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ table.id) }}">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Sélectionner une table de remplacement :</label>
+                                    <select name="new_table_id" class="form-select" required>
+                                        <option value="">-- Choisir une table --</option>
+                                        {% for otherTable in otherTables %}
+                                        <option value="{{ otherTable.id }}">
+                                            Table {{ otherTable.numero }} ({{ otherTable.capacite }} pers.) - 
+                                            {% if otherTable.status %}
+                                                <span class="text-success">Disponible</span>
+                                            {% else %}
+                                                <span class="text-danger">Indisponible</span>
+                                            {% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-exchange-alt me-2"></i>
+                                        Transférer et supprimer la table
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <!-- Si pas de réservations, suppression simple -->
+                    <div class="card">
+                        <div class="card-header bg-warning">
+                            <h5 class="mb-0">Suppression simple</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Cette table peut être supprimée sans conséquence car elle n'a aucune réservation.
+                            </div>
+                            
+                            <div class="d-grid">
+                                <form action="{{ path('app_admin_table_delete', {'id': table.id}) }}" method="post">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ table.id) }}">
+                                    <button type="submit" 
+                                            class="btn btn-warning w-100"
+                                            onclick="return confirm('Confirmer la suppression de la Table {{ table.numero }} ?')">
+                                        <i class="fas fa-trash me-2"></i>Supprimer la table
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Option 3: Annuler -->
+                    <div class="card mt-4">
+                        <div class="card-body text-center">
+                            <a href="{{ path('app_admin_tables') }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times me-2"></i>Annuler, ne pas supprimer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

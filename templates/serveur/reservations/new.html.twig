@@ -1,0 +1,178 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Nouvelle réservation - Serveur{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Nouvelle réservation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ path('app_serveur_reservation_new') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Informations client</h6>
+                                
+                                <div class="mb-3">
+                                    <label for="nom" class="form-label">Nom du client *</label>
+                                    <input type="text" class="form-control" id="nom" name="nom" required
+                                           placeholder="Entrez le nom du client">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required
+                                           placeholder="exemple@email.com">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Téléphone</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone"
+                                           placeholder="0123456789">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Détails de la réservation</h6>
+                                
+                                <div class="mb-3">
+                                    <label for="date" class="form-label">Date *</label>
+                                    <input type="date" class="form-control" id="date" name="date" 
+                                           value="{{ today|date('Y-m-d') }}" 
+                                           min="{{ today|date('Y-m-d') }}" 
+                                           required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="heure" class="form-label">Heure *</label>
+                                    <select class="form-select" id="heure" name="heure" required>
+                                        <option value="">Choisir une heure</option>
+                                        {% for hour in 12..22 %}
+                                            {% for minute in ['00', '30'] %}
+                                                {% set time = hour ~ ':' ~ minute %}
+                                                <option value="{{ time }}">{{ time }}</option>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="nb_personnes" class="form-label">Nombre de personnes *</label>
+                                    <select class="form-select" id="nb_personnes" name="nb_personnes" required>
+                                        <option value="">Sélectionner</option>
+                                        {% for i in 1..12 %}
+                                            <option value="{{ i }}">{{ i }} personne{% if i > 1 %}s{% endif %}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="table_id" class="form-label">Table *</label>
+                                    <select class="form-select" id="table_id" name="table_id" required>
+                                        <option value="">Choisir une table</option>
+                                        {% for table in tables %}
+                                            <option value="{{ table.id }}" 
+                                                    data-capacity="{{ table.capacite }}"
+                                                    {% if not table.status or table.capacite < 2 %}disabled{% endif %}>
+                                                Table {{ table.numero }} ({{ table.capacite }} pers.)
+                                                {% if not table.status %} - Occupée{% endif %}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <small class="text-muted">Seules les tables disponibles sont recommandées</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            La réservation sera automatiquement confirmée. Le client recevra une notification par email.
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('app_serveur_dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-1"></i> Créer la réservation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nbPersonnesSelect = document.getElementById('nb_personnes');
+    const tableSelect = document.getElementById('table_id');
+    const dateInput = document.getElementById('date');
+    const heureSelect = document.getElementById('heure');
+    const form = document.querySelector('form');
+    
+    // Vérifier la capacité de la table
+    tableSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const capacity = parseInt(selectedOption.dataset.capacity) || 0;
+        
+        // Activer/désactiver les options selon la capacité
+        for (let option of nbPersonnesSelect.options) {
+            if (option.value) {
+                const nbPersons = parseInt(option.value);
+                if (nbPersons > capacity) {
+                    option.disabled = true;
+                } else {
+                    option.disabled = false;
+                }
+            }
+        }
+        
+        // Si la capacité est 0 (table occupée), désactiver le nombre de personnes
+        if (capacity === 0) {
+            nbPersonnesSelect.disabled = true;
+        } else {
+            nbPersonnesSelect.disabled = false;
+        }
+    });
+    
+    // Validation du formulaire
+    form.addEventListener('submit', function(e) {
+        const heure = heureSelect.value;
+        const table = tableSelect.value;
+        const personnes = nbPersonnesSelect.value;
+        
+        if (!heure) {
+            e.preventDefault();
+            alert('Veuillez sélectionner une heure');
+            heureSelect.focus();
+            return;
+        }
+        
+        if (!table) {
+            e.preventDefault();
+            alert('Veuillez sélectionner une table');
+            tableSelect.focus();
+            return;
+        }
+        
+        if (!personnes) {
+            e.preventDefault();
+            alert('Veuillez sélectionner le nombre de personnes');
+            nbPersonnesSelect.focus();
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

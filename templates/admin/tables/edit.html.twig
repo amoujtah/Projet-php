@@ -1,0 +1,167 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Modifier table - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Administration</h6>
+                
+                <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_admin_tables') }}">
+                    <i class="fas fa-chair"></i> Gestion des tables
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_plats') }}">
+                    <i class="fas fa-utensils"></i> Gestion des plats
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_menus') }}">
+                    <i class="fas fa-clipboard-list"></i> Gestion des menus
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_users') }}">
+                    <i class="fas fa-users"></i> Gestion des utilisateurs
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Réservations
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    Modifier la table {{ table.numero }}
+                </h1>
+                <div>
+                    <a href="{{ path('app_admin_tables') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Table #{{ table.id }}</h5>
+                                <span class="badge bg-{{ table.status ? 'success' : 'danger' }}">
+                                    {{ table.status ? 'Disponible' : 'Indisponible' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form_label(form.numero, 'Numéro de table', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                        {{ form_widget(form.numero, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form_label(form.capacite, 'Capacité', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                        {{ form_widget(form.capacite, {'attr': {'class': 'form-control'}}) }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    {{ form_widget(form.status, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(form.status, 'Table disponible', {'label_attr': {'class': 'form-check-label fw-bold'}}) }}
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="{{ path('app_admin_tables') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Enregistrer
+                                </button>
+                            </div>
+                            
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <!-- Informations -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">ID de la table</small>
+                                <p class="mb-0 fw-bold">#{{ table.id }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Créée le</small>
+                                <p class="mb-0">-</p>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">Dernière modification</small>
+                                <p class="mb-0">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Réservations -->
+                    {% if table.reservations|length > 0 %}
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="fas fa-calendar me-2"></i>
+                                Dernières réservations
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% for reservation in table.reservations|slice(0, 3) %}
+                            <div class="border-bottom py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted">{{ reservation.date|date('d/m') }}</small>
+                                        <p class="mb-0 fw-medium">{{ reservation.client.nom }}</p>
+                                    </div>
+                                    <span class="badge 
+                                        {% if reservation.status == 'confirmée' %}bg-success
+                                        {% elseif reservation.status == 'en_attente' %}bg-warning
+                                        {% elseif reservation.status == 'annulée' %}bg-danger
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ reservation.nbPersonnes }} pers.
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% if table.reservations|length > 3 %}
+                            <div class="text-center mt-2">
+                                <small class="text-muted">
+                                    + {{ table.reservations|length - 3 }} autres réservations
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Nouveau menu - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <nav class="nav flex-column">
+                <h6 class="px-3 mb-3 text-uppercase text-light opacity-75">Administration</h6>
+                
+                <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_tables') }}">
+                    <i class="fas fa-chair"></i> Gestion des tables
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_plats') }}">
+                    <i class="fas fa-utensils"></i> Gestion des plats
+                </a>
+                
+                <a class="nav-link active" href="{{ path('app_admin_menus') }}">
+                    <i class="fas fa-clipboard-list"></i> Gestion des menus
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_users') }}">
+                    <i class="fas fa-users"></i> Gestion des utilisateurs
+                </a>
+                
+                <a class="nav-link" href="{{ path('app_admin_reservations') }}">
+                    <i class="fas fa-calendar-check"></i> Réservations
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-area">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Nouveau menu
+                </h1>
+                <a href="{{ path('app_admin_menus') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Retour
+                </a>
+            </div>
+            
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Créer un nouveau menu</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form) }}
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    {{ form_label(form.nom, 'Nom du menu') }}
+                                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Menu Découverte'}}) }}
+                                    {{ form_errors(form.nom) }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_label(form.prixTotal, 'Prix total (€)') }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.prixTotal, {'attr': {'class': 'form-control', 'placeholder': '49.90'}}) }}
+                                        <span class="input-group-text">€</span>
+                                    </div>
+                                    {{ form_errors(form.prixTotal) }}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-medium">
+                                    <i class="fas fa-utensils me-2"></i>
+                                    Sélectionner les plats
+                                </label>
+                                <div class="form-control" style="height: 300px; overflow-y: auto; padding: 15px;">
+                                    <div class="row">
+                                        {% if plats is defined and plats %}
+                                            {% for plat in plats %}
+                                            <div class="col-md-6 mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" 
+                                                           type="checkbox" 
+                                                           value="{{ plat.id }}" 
+                                                           id="plat-{{ plat.id }}"
+                                                           name="menu[plats][]">
+                                                    <label class="form-check-label d-flex justify-content-between w-100" for="plat-{{ plat.id }}">
+                                                        <span>
+                                                            <strong>{{ plat.nom }}</strong>
+                                                            <small class="text-muted ms-2">({{ plat.categorie }})</small>
+                                                        </span>
+                                                        <span class="text-muted">{{ plat.prix|number_format(2, ',', ' ') }} €</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="col-12 text-center py-4">
+                                                <i class="fas fa-utensils fa-2x text-muted mb-3"></i>
+                                                <p class="text-muted">Aucun plat disponible.</p>
+                                                <a href="{{ path('app_admin_plat_new') }}" class="btn btn-sm btn-outline-primary mt-2">
+                                                    Créer un plat
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {{ form_errors(form.plats) }}
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Prix total recommandé :</strong> Le prix du menu doit être inférieur à la somme des prix des plats individuels pour inciter les clients à choisir le menu.
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="{{ path('app_admin_menus') }}" class="btn btn-outline-secondary me-2">
+                                    Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Créer le menu
+                                </button>
+                            </div>
+                            
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Idées de menus
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">Menu Découverte</h6>
+                                    <small class="text-muted">1 entrée + 1 plat + 1 dessert ≈ 45€</small>
+                                </div>
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">Menu Gourmet</h6>
+                                    <small class="text-muted">2 entrées + 1 plat + 1 dessert + vin ≈ 85€</small>
+                                </div>
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">Menu Enfant</h6>
+                                    <small class="text-muted">Plat simple + dessert + boisson ≈ 25€</small>
+                                </div>
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">Menu Végétarien</h6>
+                                    <small class="text-muted">Entrée végétarienne + plat végétarien ≈ 40€</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
